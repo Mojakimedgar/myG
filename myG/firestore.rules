@@ -1,0 +1,40 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Recorded routes: only the kid who owns the route or the creator can read/write
+    match /routes_recorded/{routeId} {
+      allow read: if request.auth != null && (request.auth.uid == resource.data.kidId || request.auth.uid == resource.data.createdBy);
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.kidId;
+      allow update, delete: if request.auth != null && request.auth.uid == resource.data.kidId;
+    }
+
+    // Deviations: kid and authorized trackers may read; only kid devices write deviations
+    match /routes_deviations/{deviationId} {
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.kidId;
+      allow read: if request.auth != null && (request.auth.uid == resource.data.kidId || (resource.data.trackerIds is list && request.auth.uid in resource.data.trackerIds) || request.auth.uid == resource.data.createdBy);
+      allow update: if request.auth != null && (request.auth.uid == resource.data.kidId || (resource.data.trackerIds is list && request.auth.uid in resource.data.trackerIds));
+    }
+
+    // Alerts: only the assigned tracker can read/write their alerts
+    match /routes_alerts/{alertId} {
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.trackerId;
+      allow read: if request.auth != null && request.auth.uid == resource.data.trackerId;
+      allow update: if request.auth != null && request.auth.uid == resource.data.trackerId;
+      allow delete: if false; // Prevent clients from deleting alerts
+    }
+
+    // Active routes: kid and tracker may read; kid may create/update active route
+    match /routes_active/{activeId} {
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.kidId;
+      allow read: if request.auth != null && (request.auth.uid == resource.data.kidId || request.auth.uid == resource.data.trackerId);
+      allow update: if request.auth != null && (request.auth.uid == resource.data.kidId || request.auth.uid == resource.data.trackerId);
+      allow delete: if request.auth != null && request.auth.uid == resource.data.kidId;
+    }
+
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

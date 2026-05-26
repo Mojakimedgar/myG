@@ -1,0 +1,16 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Index from "./pages/Index";
+import Auth from "./pages/Auth";
+import NotFound from "./pages/NotFound";
+import { RouteTrackingPage } from "./pages/RouteTracking";
+import { AuthGuard } from "@/components/guards/AuthGuard";
+import { SubscriptionGuard } from "@/components/guards/SubscriptionGuard";
+import SubscriptionPage from "./pages/Subscription";
+const queryClient = new QueryClient();
+const App = () => (_jsx(QueryClientProvider, { client: queryClient, children: _jsxs(TooltipProvider, { children: [_jsx(Toaster, {}), _jsx(Sonner, {}), _jsx(BrowserRouter, { children: _jsxs(Routes, { children: [_jsx(Route, { path: "/auth", element: _jsx(Auth, {}) }), _jsx(Route, { path: "/subscription", element: _jsx(AuthGuard, { children: _jsx(SubscriptionPage, {}) }) }), _jsx(Route, { path: "/", element: _jsx(AuthGuard, { children: _jsx(SubscriptionGuard, { children: _jsx(Index, {}) }) }) }), _jsx(Route, { path: "/route-tracking", element: _jsx(AuthGuard, { children: _jsx(SubscriptionGuard, { children: _jsx(RouteTrackingPage, {}) }) }) }), _jsx(Route, { path: "*", element: _jsx(NotFound, {}) })] }) })] }) }));
+export default App;
